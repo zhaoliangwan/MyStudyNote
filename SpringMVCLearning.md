@@ -63,8 +63,6 @@
   * [8.3 EL隐式对象](#83-el隐式对象)
     * [8.3.1 pageContext](#831-pagecontext)
 
-
-[toc]
 # SpringMVC 学习笔记
 ## 前言
 1. 什么是MVC？\
