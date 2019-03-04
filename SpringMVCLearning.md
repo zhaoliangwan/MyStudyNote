@@ -1,4 +1,4 @@
-[toc]
+markdown-toc
 # SpringMVC 学习笔记
 ## 前言
 1. 什么是MVC？\
