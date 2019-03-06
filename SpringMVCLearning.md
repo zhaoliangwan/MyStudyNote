@@ -62,6 +62,41 @@
   * [8.2 访问JavaBean](#82-访问javabean)
   * [8.3 EL隐式对象](#83-el隐式对象)
     * [8.3.1 pageContext](#831-pagecontext)
+    * [8.3.2 initParam](#832-initparam)
+    * [8.3.3 param](#833-param)
+    * [8.3.4 paramValues](#834-paramvalues)
+    * [8.3.5 header](#835-header)
+    * [8.3.6 headerValues](#836-headervalues)
+    * [8.3.7 cookie](#837-cookie)
+    * [8.3.8 applicationScope,sessionScope,requestScope和pageScope](#838-applicationscopesessionscoperequestscope和pagescope)
+  * [8.4 使用其他EL运算符](#84-使用其他el运算符)
+    * [8.4.1 算术运算符](#841-算术运算符)
+    * [8.4.2 关系运算符](#842-关系运算符)
+    * [8.4.3 逻辑运算符](#843-逻辑运算符)
+    * [8.4.4 条件运算符](#844-条件运算符)
+    * [8.4.5 empty运算符](#845-empty运算符)
+    * [8.4.6 字符串连接运算符](#846-字符串连接运算符)
+    * [8.4.7 分号操作符](#847-分号操作符)
+  * [8.5 引用静态属性和静态方法](#85-引用静态属性和静态方法)
+  * [8.6 创建Set、List和Map](#86-创建set、list和map)
+  * [8.7 访问列表元素和Map条目](#87-访问列表元素和map条目)
+  * [8.8 操作集合](#88-操作集合)
+    * [8.8.1 toList](#881-tolist)
+    * [8.8.2 toArray](#882-toarray)
+    * [8.8.3 limit](#883-limit)
+    * [8.8.4 sort](#884-sort)
+    * [8.8.5 average](#885-average)
+    * [8.8.6 sum](#886-sum)
+    * [8.8.7 count](#887-count)
+    * [8.8.8 min](#888-min)
+    * [8.8.9 max](#889-max)
+    * [8.8.10 map](#8810-map)
+    * [8.8.11 filter](#8811-filter)
+    * [8.8.12 forEach](#8812-foreach)
+  * [格式化集合](#格式化集合)
+    * [8.9.1 使用HTML注释](#891-使用html注释)
+    * [8.9.2 使用String.join()](#892-使用stringjoin)
+
 
 # SpringMVC 学习笔记
 ## 前言
@@ -1728,5 +1763,286 @@ PageContext | javax.servlet.jsp.PageContext
 page | javax.servlet.jsp.HttpJspPage
 exception | java.lang.Throwable
 
-例如，可以利用以下任意一个表达式来获取当前的ServletRequest:
-${page}
+例如，可以利用以下任意一个表达式来获取当前的ServletRequest:  
+```
+${pageContext.request}
+${pageContext["request"]}
+```
+并且，还可以利用以下任意表达式来获取请求方法：  
+```
+${pageContext["request"]["method"]}
+${pageContext["request"].method}
+${pageContext.request["method"]}
+${pageContext.request.method}
+```
+
+属性 | 说明
+---- | ----
+characterEncoding | 请求的字符编码
+contentType | 请求的MIME类型
+locale | 浏览器首先locale
+locales | 所有locale
+protocol | HTTP协议，例如:HTTP/1.1
+remoteAddr | 客户端IP地址
+remoteHost | 客户端IP地址或主机名
+scheme | 请求发送方案，HTTP或HTTPS
+serverName | 服务器主机名
+serverPort | 服务器端口
+secure | 请求是否通过安全链接传输
+
+对请求参数的访问比对其他隐式对象更加频繁；因此，这里提供了param和paramValues两个隐式对象。
+
+### 8.3.2 initParam
+隐式对象initParam用于获取上下文参数的值。  
+例如，为了获取名为password的上下文参数值，可以使用以下表达式：
+${initParam.password}  
+或者  
+${initParam["password"]}
+
+### 8.3.3 param
+隐式对象param用于获取请求参数值。这个对象表示一个包含所有请求参数的Map。  
+
+### 8.3.4 paramValues
+利用隐式对象paramValues 可以获取一个请求参数的多个值。这个对象表示一个包含所有请求参数，并以参数名称作为key的Map。每个key的值是一个字符串数组，其中包含了指定参数名称的所有值。即使该参数只有一个值，它也任然返回一个带有一个元素的数组。  
+例如，为了获得selectedOptions参数的第一个值和第二个值，可以使用以下表达式：
+${paramValues.selectedOptions[0]}  
+${paramValues.selectedOptions[1]}
+
+### 8.3.5 header
+隐式对象header表示一个包含所有请求标题的Map。为了获取header值，要利用header名称作为key。  
+例如，为了获取accept-language这个header值，可以用以下表达式：
+${header["accept-language"]}
+如果header名称是一个有效的Java变量名，如connection，那么也可以使用.运算符：
+${header.connection}
+
+### 8.3.6 headerValues
+隐式对象headerValues表示一个包含所有请求head并以header名称作为key的Map。但是，与head不同的是，隐式对象headerValues返回的Map返回的是一个字符串数组。  
+例如为了获取标题accept-language的第一个值，要使用以下表达式：
+${headerValues["accept-language"][0]}  
+
+### 8.3.7 cookie
+隐式对象cookie可以用来获取一个cookie。这个对象表示当前HttpServletRequest中所有cookie的值。  
+例如，为了获取名为jsessionid的cookie值，要使用以下表达式：
+`${cookie.jsessionid.value}`
+
+### 8.3.8 applicationScope,sessionScope,requestScope和pageScope
+隐式对象applicationScope用于获取应用程序范围级变量的值。加入有一个应用程序范围级变量myVar，就可以利用以下表达式获取这个属性：
+${applicationScope.myVar}
+注意，在servlet/JSP编程中，有界对象是指在以下对象中作为属性：PageContext、ServletRequest、HttpSession或者ServletContext。隐式对象sessionScope、requestScope和pageScope与applicationScope相似。但是，其范围分别为session、request和page。
+有界对象也可以通过没有范围的EL表达式获取。在这种情况下，JSP容器将返回PageContext、ServletRequest、HttpSession或者ServletContext中第一个同名对象。执行顺序是从最小范围(PageContext)到最大范围（ServletContext）。  
+例如，以下表达式将返回today应用的任意范围的对象。  
+${today}
+
+## 8.4 使用其他EL运算符
+
+除了上述两种运算符，EL还提供了其他运算符：算术运算符、关系运算符、逻辑运算符、条件运算符，以及empty运算符。使用这些运算符时，可以进行不同的运算。但是，由于EL的目的时方便免脚本JSP页面的编程，因此，除了关系运算符外，这些EL运算符的用处都很有限。
+
+### 8.4.1 算术运算符
+- 加法(+)
+- 减法(-)
+- 乘法(*)
+- 除法(/和div)
+- 取模/取余(%和mod)
+
+**注意：**EL表达式的计算按优先级从高到低、从左到右进行。下列运算符时按优先级递减舒徐排列的：
+- */div%mod
+- +-
+这表示第一组优先级相同、第二组优先级象通，但第二组运算符优先级小于第一组运算符。
+
+### 8.4.2 关系运算符
+- 等于(==和eq)
+- 不等于(!=和ne)
+- 大于(>和gt)
+- 大于或等于(>=和ge)
+- 小于(<和lt)
+- 小于等于(<=和le)
+
+
+### 8.4.3 逻辑运算符
+- 和(&&和and)
+- 或(||和or)
+- 非(!和not)
+
+### 8.4.4 条件运算符
+EL条件运算符的语法如下：
+${statement?A:B}
+
+如果statement的计算机给为True，那么该表达式输出结果就是A否则为B。
+
+### 8.4.5 empty运算符
+empty运算符用来检查某一个值是否为null或者empty。如果该值为null或者为一个长度是0的字符串，那么该表达式将返回True。如果该值是一个空Map、空数组或者空集合，他也将返回True。否则将返回False。
+
+### 8.4.6 字符串连接运算符
++ = 运算符用于连接字符串。例如，以下表达式打印a+b的值。
+$ {a + = b}
+
+### 8.4.7 分号操作符
+；操作符用于分隔两个表达式。
+
+## 8.5 引用静态属性和静态方法
+您可以引用在任何Java类中定义的静态字段和方法。但是，在可以在JSP页面中国引用静态字段或方法之前，必须使用page伪指令导入类或类包。java.lang包是一个例外，因为它是自动导入的。  
+例如，以下page指令导入java.time包。  
+<%@page import="java.time.*"%>  
+或者可以导入单个类，如：  
+<%@page import="java.time.LocalDate"%>  
+限制可以引用LoacalDate类的静态方法:now方法  
+Today is ${LocalDate.now()}
+
+此外，还有一种导入包的方法，是在ServletContextlistener中以编程方式导入。
+```java
+package listener;
+import javax.el.ELContextEvent;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
+import javax.servlet.jsp.JspFactory;
+
+@WebListener
+public class ELImportListener implements ServletContextListener{
+    @Override
+    public void contextInitialized(ServletContextEvent event){
+        Jsp.Factory.getDefaultFactory().getJspAllicationContext(
+            event.getServletContext()).addELContextListener(
+                (ELContextEvnet e)->{
+                    e.getELContext.getImportHandler().
+                    importPackage("java.time");
+                    e.getELContext.getInportHandler().
+                    importPackage("java.util");
+                    
+                });
+    }
+    
+    @Override
+    public void contextDestroyed(ServletContextEvent event){
+        
+    }
+}
+```
+
+## 8.6 创建Set、List和Map
+可以动态创建Set、List和Map。  
+{comma-delimited-elements}  
+例如,创建一个五个数字的Set  
+${{1,2,3,4,5}}  
+创建一个List的语法：
+[comma-delimited-elements]    
+例如，创建一个化名的List:  
+${["Aster","Carnation","Rose"]}  
+最后，创建一个Map的语法为：
+{comma-delimited-key-value-entries}  
+例如，下面的一组国际及其首都的maps:  
+${{"Canada":"Ottawa","China":"Beijing", "France":"Paris"}}
+
+## 8.7 访问列表元素和Map条目
+可以通过索引来访问List，如下表达式返回CIties的第一个元素  
+${cities[0]}  
+可以通过如下方式访问Map
+${map[key]}
+
+## 8.8 操作集合
+操纵集合可以通过调用流方法将集合转换为流来使用此功能。  
+下面展示如何将列表转换为流，假设myList是一个java.util.List:
+${myList.stream()}  
+大部分流的操作会返回另一个流，因而可以形成链式操作。
+${MyList.stream().operation-1().operation-2().toList()}
+在链式操作的末尾，通常可以调用toList方法，以便打印或格式化结果。
+
+### 8.8.1 toList
+toList方法会返回一个List，它包含与当前流相同的成员。调用此方法的主要目的是轻松地打印或者操作硫元素。
+${[100,200,300].stream().toList()}
+
+### 8.8.2 toArray
+与toList类似，但返回一个Java数组。同样，在数组中呈现元素通常是有用地，因为许多java方法将数组作为参数。  
+${["One", "Two", "Three"].stream().toArray()}  
+与toList不同，toArray不打印元素，因此，toList更经常使用。
+
+### 8.8.3 limit
+limit方法限制流中元素地数量
+名为cities地List包含7个城市：
+[Paris, Strasbourg, London, New York, Beijing, Amsterdam, San Francisco] 
+下面将元素地数量限制为3.
+${cities.stream().limit(3).toList()}  
+如果传递给limit方法的参数大于元素的数量，则返回所有元素。
+
+### 8.8.4 sort  
+此方法对流中所有元素进行排序。（字典序）
+
+### 8.8.5 average
+此方法返回流中所有元素的平均值。其返回值是一个Optional对象，它可能为null。需要调用get()获取实际值。  
+此表达式4.0：  
+${[1,3,5,7]}
+
+### 8.8.6 sum
+此方法计算流中所有元素的总和。例如，此式返回16.
+${[1,3,5,7].stream().sun()}
+
+### 8.8.7 count
+此方法返回流中元素的数量。
+${cities.stream().count()}
+
+### 8.8.8 min
+此方法返回流的元素中的最小值。同average方法一样，其返回值就是一个Optional对象，因此你需要调用get方法来获取实际值。
+${[1,3,100,1000].stream().min().get()}
+
+### 8.8.9 max
+此方法返回流的元素中的最大值。同上。
+
+### 8.8.10 map
+此方法将流中的每个元素映射到另一个流中的另一个元素，并返回该流。此方法接受一个lambda表达式。  
+例如，此映射方法使用lambda表达式x->2*x,这实际上将每个元素乘2，并将它们返回到新的流中。
+${[1,3,5].stream().map(x->2*x).toList()}
+${cities.stream().map(x->x.toUpperCase()).toList}
+
+### 8.8.11 filter
+此方法根据lambda表达式过来流中的所有元素，并返回包含结果的新流。   
+例如，一下表达式测试城市是否以"S"开头，并返回所有的结果。  
+${cities.stream().filter(x->x.startsWith("S").toList())}
+
+### 8.8.12 forEach
+此方法对流中的所有元素执行操作。它返回void。   
+例如，此表达式将城市中的所有元素打印到控制台。  
+${cities.stream().forEach(x->System.out.println(x))}
+
+## 格式化集合
+### 8.9.1 使用HTML注释
+使用HTML注释去掉List中的方括号及逗号：  
+```html
+<ul>
+<!--${cites.stream().map(x->"--><li>"+ = x + ="</li><!--").toList()}-->
+<ul>
+
+
+结果如下:
+<ul>
+<!--[--><li>Paris</li><!--,--><li>Strasbourg</li><!--,-->
+<li>London</li><!--,--><li>New York</li><!--,-->
+<li>Beijing</li><!--,--><li>Amsterdam</li><!--,-->
+<li>San Francisco</li><!--,-->
+</ul>
+```
+![效果图](https://s2.ax1x.com/2019/03/06/kjhdRP.png)
+
+例2，用表格格式化显示地址信息。
+```html
+<table>
+    <tr><th>Street</th><th>City</th></tr>
+    <!--${addresses.stream().map(a->"-->
+<tr><td>"+=a.streetName+="</td><td>"+=a.city+="</td></tr><!--").toList()}-->
+</table>
+```
+
+### 8.9.2 使用String.join()
+EL3.0允许引用静态方法。String类新增了一些静态方法，其中一个方法是join，有两个重载join方法，这里要用的方法如下：
+```java
+public static String join(CharSequence delimiter,
+    Iterable <? extends CharSequence> elements)
+```
+
+此方法返回用指定分隔符连接在一起的charSequence元素组成的字符串。而java.util.Collection接口正好扩展了Iterable <? extends CharSequence> elements)，因此可以将Collection传递给join方法。  
+例如：  
+${"<ol><li>"+ = String.join("</ li> <li>", 城市)+ ="< li> </ ol>"}  
+此表达式适用于至少有一个元素的集合。如果要处理一个空集合：
+${empty cities? "" : "<ol><li>"
+    += String.join("</li><li>", cities.stream().sorted().toList())
+    += "</li></ol>"
+}
